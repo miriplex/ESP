@@ -20,10 +20,10 @@ void Motor::setSpeed(float speed) {
     // Set direction and adjust duty cycle accordingly.
     if (speed < 0) {
         _dir = 0;              // 0 for reverse (example)
-        _pwm.write(-speed);    // PWM duty cycle must be positive.
+        _pwm.write(1 + speed);    // PWM duty cycle must be positive.
     } else {
         _dir = 1;              // 1 for forward (example)
-        _pwm.write(speed);
+        _pwm.write(1 - speed);
     }
     _speed = speed;
 }

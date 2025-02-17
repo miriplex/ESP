@@ -4,3 +4,5 @@ compile_commands.json
 .clangd
 .cache
 mbed
+QEI
+C12832
