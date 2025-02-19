@@ -15,7 +15,11 @@ private:
     float rightWheelDiameter;
     float leftWheelDiameter;
     float distanceBetweenWheels;
-    float calculateWheelVelocity(bool selectRightwheel) const;
+    float updateTime;
+    float rSpeed;
+    float lSpeed;
+    float calculateRWheelVelocity();
+    float calculateLWheelVelocity();
     void updateTickCount();
     QEI rightWheel;
     QEI leftWheel;
@@ -38,22 +42,22 @@ public:
 
     void setRightWheelDiameter(float wheelDiameter);
 
-
     void setDistanceBetweenWheels(float distance);
+
 
     /**
      * Get Robot's translational Velocity
      *
      * @return Buggy's translational velocity in meters 
      */
-    float getTranslationalVelocity() const;
+    float getTranslationalVelocity();
 
         /**
      * Get Robot's angular Velocity
      *
      * @return Buggy's angular velocity in meters 
      */
-    float getAngularVelocity() const;
+    float getAngularVelocity();
 
     /**
      * Update Update time fo the buggy
@@ -61,6 +65,13 @@ public:
      * @param time New update time in seconds.
      */
     void setUpdateTime(float time);
+
+    void reset();
+
+    int getRightTicks();
+
+    int getLeftTicks();
+
 
 };
 
