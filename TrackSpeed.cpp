@@ -7,23 +7,23 @@ TrackSpeed::TrackSpeed(float updateTime,
                        PinName rightChA, PinName rightChB, int rightPulsesPerRev,
                        PinName leftChA,  PinName leftChB,  int leftPulsesPerRev)
     : rightWheel(rightChA, rightChB, NC, rightPulsesPerRev, QEI::X4_ENCODING),
-      leftWheel(leftChA, leftChB, NC, leftPulsesPerRev, QEI::X4_ENCODING), leftTicksPerRev(leftPulsesPerRev), rightTicksPerRev(rightPulsesPerRev)
+      leftWheel(leftChA, leftChB, NC, leftPulsesPerRev, QEI::X4_ENCODING), leftTicksPerRev(leftPulsesPerRev), rightTicksPerRev(rightPulsesPerRev), updateTime(updateTime)
 {
     sampler.attach(callback(this, &TrackSpeed::updateTickCount), updateTime);
 }
 
-float TrackSpeed::calculateWheelVelocity(bool selectRightwheel) const {
+float TrackSpeed::calculateRWheelVelocity() {
     int tickDifference;
-    float speed;
-    if (selectRightwheel) {
-        tickDifference = rightCurrentEncoderTicks - rightPreviousEncoderTicks;
-        speed = (static_cast<float>(tickDifference) / rightTicksPerRev) * (rightWheelDiameter * PI);
-    }
-    else {
-        tickDifference = leftCurrentEncoderTicks - leftPreviousEncoderTicks;
-        speed = (static_cast<float>(tickDifference) / leftTicksPerRev) * (leftWheelDiameter * PI);
-    }
-    return speed;
+    tickDifference = rightCurrentEncoderTicks - rightPreviousEncoderTicks;
+    rSpeed = ((static_cast<float>(tickDifference) / rightTicksPerRev) * (rightWheelDiameter * PI)) / updateTime;
+    return rSpeed;
+}
+
+float TrackSpeed::calculateLWheelVelocity() {
+    int tickDifference;
+    tickDifference = leftCurrentEncoderTicks - leftPreviousEncoderTicks;
+    lSpeed = ((static_cast<float>(tickDifference) / leftTicksPerRev) * (leftWheelDiameter * PI)) / updateTime;
+    return lSpeed;
 }
 
 void TrackSpeed::updateTickCount() {
@@ -45,16 +45,29 @@ void TrackSpeed::setDistanceBetweenWheels(float distance) {
     distanceBetweenWheels = distance;
 }
 
-float TrackSpeed::getTranslationalVelocity() const {
-    float rightWheelVelocity = TrackSpeed::calculateWheelVelocity(true);
-    float leftWheelVelocity = TrackSpeed::calculateWheelVelocity(false);
+float TrackSpeed::getTranslationalVelocity() {
+    float rightWheelVelocity = -TrackSpeed::calculateRWheelVelocity();
+    float leftWheelVelocity = TrackSpeed::calculateLWheelVelocity();
 
     return (rightWheelVelocity + leftWheelVelocity) / 2;
 }
 
-float TrackSpeed::getAngularVelocity() const {
-    float rightWheelVelocity = TrackSpeed::calculateWheelVelocity(true);
-    float leftWheelVelocity = TrackSpeed::calculateWheelVelocity(false);
+float TrackSpeed::getAngularVelocity() {
+    float rightWheelVelocity = -TrackSpeed::calculateRWheelVelocity();
+    float leftWheelVelocity = TrackSpeed::calculateLWheelVelocity();
 
     return (rightWheelVelocity - leftWheelVelocity) / distanceBetweenWheels;
+}
+
+void TrackSpeed::reset() {
+    rightWheel.reset();
+    leftWheel.reset();
+}
+
+int TrackSpeed::getRightTicks() {
+    return -rightCurrentEncoderTicks;
+}
+
+int TrackSpeed::getLeftTicks() {
+    return leftCurrentEncoderTicks;
 }
